@@ -42,16 +42,22 @@ asks for them, and each package once, keeping them in `build/mirror`.
 
 `pkg` takes no index without a good Ed25519 signature (`INDEX.SIG`) by a key
 the system trusts (`/disk/SYS/PKG/KEYS`), and installs no package whose SHA-256
-differs from the one in the index. The relay and this repository are not
-trusted: a changed file is refused on SkyTOS. The packages here are signed by
+differs from the one in the index. Nor does it take an index older than
+the one it has (by the index's sequence), so an old release served again
+cannot put old packages back; `pkg update -f` takes one on purpose. The
+relay and this repository are not trusted: a changed file is refused on
+SkyTOS. The packages here are signed by
 
     8f75f8d4c08627c0d5db341e96dfc6ce1a23e1d64dfc456e948d3f0734213830
 
 ## The format
 
-`INDEX` is a line `SKYTOS-PACKAGES 1`, then a line for each package, its
-fields separated by tabs: name, version, file, bytes, SHA-256, bytes
-installed, packages it needs (`,`-separated, `-` for none), summary.
+`INDEX` is a line `SKYTOS-PACKAGES 1`, a line `sequence YYYYMMDDHHMMSS`
+(the time, UTC, its packages last changed), then a line for each package,
+its fields separated by tabs: name, version, file, bytes, SHA-256, bytes
+installed, packages it needs (`,`-separated, `-` for none), summary. A
+version is the package's own number and the first 8 hex digits of a
+SHA-256 over its files, so any change makes a new one.
 
 `INDEX.SIG` is one line: `ED25519`, the public key and the signature of
 `INDEX`, in hex.
